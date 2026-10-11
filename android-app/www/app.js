@@ -24,18 +24,38 @@ db.categories ||= ['Makanan', 'Minuman', 'Sembako', 'Lainnya'];
 if(!db.tokoId) { db.tokoId = 'TOKO_' + Math.floor(Math.random()*9000+1000); save(); }
 
 // Produk contoh untuk demo
+const svgIcon = (emoji, bg) => 'data:image/svg+xml,' + encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='${bg}'/><text x='50' y='58' font-size='46' text-anchor='middle'>${emoji}</text></svg>`);
+
 if(!db.seeded) {
-    const svg = (emoji, bg) => 'data:image/svg+xml,' + encodeURIComponent(
-        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='${bg}'/><text x='50' y='58' font-size='46' text-anchor='middle'>${emoji}</text></svg>`);
     db.products = [
-        { id: 'P_SEED1', n: 'Indomie Goreng', p: 3500, q: 24, c: '8992388101010', cat: 'Makanan', img: svg('🍜', '#fef3c7') },
-        { id: 'P_SEED2', n: 'Aqua 600ml', p: 4000, q: 30, c: '8996001306015', cat: 'Minuman', img: svg('💧', '#dbeafe') },
-        { id: 'P_SEED3', n: 'Teh Botol 350ml', p: 5000, q: 18, c: '', cat: 'Minuman', img: svg('🍵', '#d1fae5') },
-        { id: 'P_SEED4', n: 'Kopi Sachet', p: 2500, q: 40, c: '', cat: 'Makanan', img: svg('☕', '#f3e8d2') },
-        { id: 'P_SEED5', n: 'Beras 5kg', p: 75000, q: 10, c: '', cat: 'Sembako', img: svg('🍚', '#fef9c3') },
-        { id: 'P_SEED6', n: 'Minyak Goreng 1L', p: 18000, q: 12, c: '', cat: 'Sembako', img: svg('🛢️', '#e0e7ff') }
+        { id: 'P_SEED1', n: 'Indomie Goreng', p: 3500, q: 24, c: '8992388101010', cat: 'Makanan', img: svgIcon('🍜', '#fef3c7') },
+        { id: 'P_SEED2', n: 'Aqua 600ml', p: 4000, q: 30, c: '8996001306015', cat: 'Minuman', img: svgIcon('💧', '#dbeafe') },
+        { id: 'P_SEED3', n: 'Teh Botol 350ml', p: 5000, q: 18, c: '', cat: 'Minuman', img: svgIcon('🍵', '#d1fae5') },
+        { id: 'P_SEED4', n: 'Kopi Sachet', p: 2500, q: 40, c: '', cat: 'Makanan', img: svgIcon('☕', '#f3e8d2') },
+        { id: 'P_SEED5', n: 'Beras 5kg', p: 75000, q: 10, c: '', cat: 'Sembako', img: svgIcon('🍚', '#fef9c3') },
+        { id: 'P_SEED6', n: 'Minyak Goreng 1L', p: 18000, q: 12, c: '', cat: 'Sembako', img: svgIcon('🛢️', '#e0e7ff') }
     ];
     db.seeded = true;
+    save();
+}
+
+// Tambah produk demo jika produk kurang dari 12 (untuk tes pagination)
+if(!db.seedPageExtra) {
+    const extra = [
+        { id: 'P_SEED7', n: 'Gula Pasir 1kg', p: 16000, q: 20, c: '8991001', cat: 'Sembako', img: svgIcon('🧂', '#fef3c7') },
+        { id: 'P_SEED8', n: 'Telur Ayam 1kg', p: 28000, q: 15, c: '8991002', cat: 'Sembako', img: svgIcon('🥚', '#ffedd5') },
+        { id: 'P_SEED9', n: 'Susu UHT 200ml', p: 6000, q: 25, c: '8991003', cat: 'Minuman', img: svgIcon('🥛', '#e0f2fe') },
+        { id: 'P_SEED10', n: 'Biskuit Roma', p: 8500, q: 18, c: '8991004', cat: 'Makanan', img: svgIcon('🍪', '#fef9c3') },
+        { id: 'P_SEED11', n: 'Sabun Mandi', p: 4500, q: 30, c: '8991005', cat: 'Lainnya', img: svgIcon('🧼', '#f3e8ff') },
+        { id: 'P_SEED12', n: 'Shampoo Sachet', p: 1500, q: 50, c: '8991006', cat: 'Lainnya', img: svgIcon('🧴', '#ecfdf5') },
+        { id: 'P_SEED13', n: 'Kerupuk Kaleng', p: 2000, q: 40, c: '8991007', cat: 'Makanan', img: svgIcon('🍘', '#fff7ed') },
+        { id: 'P_SEED14', n: 'Mie Kari Ayam', p: 3500, q: 22, c: '8991008', cat: 'Makanan', img: svgIcon('🍲', '#fef3c7') }
+    ];
+    extra.forEach(x => {
+        if(!db.products.some(p => p.id === x.id || p.n === x.n)) db.products.push(x);
+    });
+    db.seedPageExtra = true;
     save();
 }
 
