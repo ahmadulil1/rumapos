@@ -24,8 +24,12 @@
     .btn-theme { width: 34px; height: 34px; border-radius: 10px; padding: 0; font-size: 16px; background: rgba(255,255,255,.18); color: #fff; display: flex; align-items: center; justify-content: center; border: none; box-shadow: none; min-height: unset; cursor: pointer; }
     .btn-theme:active { transform: scale(.92); }
 
+    /* --- Sticky Header Search & Kategori --- */
+    .pos-sticky-head { position: sticky; top: -16px; z-index: 8; background: var(--bg); padding: 4px 0 2px; }
+    body.dark .pos-sticky-head { background: var(--bg); }
+
     /* --- Search & Scan Terpadu --- */
-    .pos-search-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .pos-search-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
     .search-input-box { flex: 1; position: relative; display: flex; align-items: center; }
     .search-input-box .search-icon { position: absolute; left: 12px; font-size: 14px; color: var(--mut); pointer-events: none; }
     .search-input-box input { margin: 0; padding: 10px 12px 10px 36px; font-size: 14px; border-radius: 12px; min-height: 42px; border: 1.5px solid #e5e7eb; background: var(--card); }
@@ -70,7 +74,9 @@
     .pos-right { flex-direction: column; gap: 12px; }
 
     @media (max-width: 767px) {
-      .cart-fab { display: block; position: sticky; bottom: 78px; z-index: 6; box-shadow: 0 6px 18px rgba(16,185,129,.5); }
+      .pos-left { padding-bottom: 125px; }
+      .cart-fab { display: flex !important; align-items: center; justify-content: space-between; position: fixed; bottom: calc(56px + env(safe-area-inset-bottom)); left: 10px; right: 10px; width: calc(100% - 20px) !important; z-index: 6; box-shadow: 0 4px 16px rgba(16,185,129,.45); border-radius: 14px; padding: 12px 18px; font-size: 14px; font-weight: 700; min-height: 48px; margin: 0; }
+      .cart-fab-tot { font-weight: 800; font-size: 15px; }
       .pos-right { display: none; position: fixed; inset: 0; z-index: 20; overflow-y: auto; background: var(--bg); padding: 16px; padding-bottom: 100px; }
       .pos-right.open { display: flex; }
       .back-btn { display: block; }
@@ -162,18 +168,23 @@
     <div class="tab on" id="kasir">
       <div class="pos-wrap">
         <div class="pos-left">
-          <div class="pos-search-row">
-            <div class="search-input-box">
-              <span class="search-icon">🔍</span>
-              <input id="pq" placeholder="Cari nama atau barcode..." oninput="searchProd()" autocomplete="off">
+          <div class="pos-sticky-head">
+            <div class="pos-search-row">
+              <div class="search-input-box">
+                <span class="search-icon">🔍</span>
+                <input id="pq" placeholder="Cari nama atau barcode..." oninput="searchProd()" autocomplete="off">
+              </div>
+              <button type="button" class="btn-scan-act" onclick="scan()" title="Scan Barcode Kamera">
+                📷 <span>Scan</span>
+              </button>
             </div>
-            <button type="button" class="btn-scan-act" onclick="scan()" title="Scan Barcode Kamera">
-              📷 <span>Scan</span>
-            </button>
+            <div class="chips" id="chips"></div>
           </div>
-          <div class="chips" id="chips"></div>
           <div id="grid"></div>
-          <button class="g cart-fab" onclick="openCheckout()">🧺 Keranjang (<span id="cc-n">0</span>) · Rp<span id="cc-t">0</span></button>
+          <button class="g cart-fab" onclick="openCheckout()">
+            <span>🧺 Keranjang (<span id="cc-n">0</span>)</span>
+            <span class="cart-fab-tot">Rp<span id="cc-t">0</span></span>
+          </button>
         </div>
         <div class="pos-right" id="posright">
           <button class="s back-btn" onclick="closeCheckout()">← Kembali Belanja</button>
