@@ -23,6 +23,35 @@
     .badge-sync { font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 12px; background: rgba(255,255,255,.18); color: #fff; }
     .btn-theme { width: 34px; height: 34px; border-radius: 10px; padding: 0; font-size: 16px; background: rgba(255,255,255,.18); color: #fff; display: flex; align-items: center; justify-content: center; border: none; box-shadow: none; min-height: unset; cursor: pointer; }
     .btn-theme:active { transform: scale(.92); }
+    .hdr-logo { overflow: hidden; }
+    .hdr-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* --- Sidebar Drawer --- */
+    #drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 84vw; background: var(--card); z-index: 31; transform: translateX(-105%); transition: transform .22s ease; display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,.25); }
+    #drawer.on { transform: none; }
+    #drawer-back { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 30; display: none; }
+    #drawer-back.on { display: block; }
+    .dprof { padding: 18px 16px; background: linear-gradient(135deg, #4c1d95, #6d28d9); color: #fff; display: flex; align-items: center; gap: 12px; }
+    .dprof .hdr-logo { width: 44px; height: 44px; font-size: 20px; background: rgba(255,255,255,.2); }
+    .dprof b { display: block; font-size: 15px; }
+    .dprof small { opacity: .85; font-size: 11px; }
+    .dnav { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+    .dnav button { display: flex; align-items: center; gap: 12px; text-align: left; padding: 13px 14px; font-size: 15px; background: transparent; color: var(--ink); box-shadow: none; border-radius: 12px; width: 100%; }
+    .dnav button.on { background: rgba(109,40,217,.12); color: var(--v); font-weight: 700; }
+    .dnav button.exit { color: var(--r); margin-top: 6px; }
+    body.dark .dnav button.exit { color: #f87171; }
+
+    /* --- Modal Preview Nota --- */
+    .nota-modal { position: fixed; inset: 0; z-index: 40; display: none; background: rgba(0,0,0,.55); align-items: center; justify-content: center; padding: 16px; }
+    .nota-modal.on { display: flex; }
+    .nota-paper { background: #fff; border-radius: 10px; max-height: 82vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,.4); -webkit-overflow-scrolling: touch; }
+    .nota-actions { position: sticky; bottom: 0; background: #fff; border-top: 1px dashed #ccc; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .nota-actions button { padding: 12px; font-size: 14px; }
+
+    /* --- Pagination stok --- */
+    .pager { display: none; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
+    .pager button { width: auto; padding: 9px 18px; font-size: 14px; }
+    .pager button:disabled { opacity: .4; transform: none; }
 
     /* --- Sticky Header Search & Kategori --- */
     .pos-sticky-head { position: sticky; top: -16px; z-index: 8; background: var(--bg); padding: 4px 0 2px; }
@@ -62,9 +91,6 @@
     body.dark li { border-color:#332e45; }
     body.dark nav { background:#211d2e; }
     body.dark hr { border-color:#332e45 !important; }
-    nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: #fff; box-shadow: 0 -2px 12px rgba(0,0,0,.08); padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); z-index: 5; }
-    nav button { flex: 1; background: transparent; color: var(--mut); box-shadow: none; padding: 10px 4px; font-size: 13px; font-weight: 600; border-radius: 12px; min-height: 44px; }
-    nav button.on { background: linear-gradient(135deg, var(--v), var(--v2)); color: #fff; }
     button, input, select, li button { min-height: 44px; }
     label { font-size: 13px; color: var(--mut); font-weight: 600; display: block; margin-bottom: 4px; }
     input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--b); outline-offset: 2px; }
@@ -74,8 +100,8 @@
     .pos-right { flex-direction: column; gap: 12px; }
 
     @media (max-width: 767px) {
-      .pos-left { padding-bottom: 125px; }
-      .cart-fab { display: flex !important; align-items: center; justify-content: space-between; position: fixed; bottom: calc(56px + env(safe-area-inset-bottom)); left: 10px; right: 10px; width: calc(100% - 20px) !important; z-index: 6; box-shadow: 0 4px 16px rgba(16,185,129,.45); border-radius: 14px; padding: 12px 18px; font-size: 14px; font-weight: 700; min-height: 48px; margin: 0; }
+      .pos-left { padding-bottom: 92px; }
+      .cart-fab { display: flex !important; align-items: center; justify-content: space-between; position: fixed; bottom: calc(12px + env(safe-area-inset-bottom)); left: 10px; right: 10px; width: calc(100% - 20px) !important; z-index: 6; box-shadow: 0 4px 16px rgba(16,185,129,.45); border-radius: 14px; padding: 12px 18px; font-size: 14px; font-weight: 700; min-height: 48px; margin: 0; }
       .cart-fab-tot { font-weight: 800; font-size: 15px; }
       .pos-right { display: none; position: fixed; inset: 0; z-index: 20; overflow-y: auto; background: var(--bg); padding: 16px; padding-bottom: 100px; }
       .pos-right.open { display: flex; }
@@ -91,6 +117,7 @@
       .pos-right { display: flex; flex: 1; position: sticky; top: 16px; max-height: calc(100vh - 130px); overflow-y: auto; }
       #grid { grid-template-columns: repeat(3, 1fr); }
     }
+    @media (min-width: 1100px) { #drawer { left: calc((100vw - 1100px) / 2); } }
     #scan { position: fixed; inset: 0; background: #000; z-index: 9; display: none; flex-direction: column; }
     #scan.on { display: flex; }
     #scan video { flex-grow: 1; width: 100%; object-fit: cover; }
@@ -113,6 +140,7 @@
     .chips::-webkit-scrollbar { display: none; }
     .chips button { width: auto !important; flex: 0 0 auto !important; white-space: nowrap; background: #e5e7eb; color: var(--ink); padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 20px; box-shadow: none; min-height: 32px; height: 32px; border: none; }
     .chips button.on { background: var(--v); color: #fff; box-shadow: 0 2px 6px rgba(109,40,217,.3); }
+    .chips button.add { background: var(--b); color: #fff; }
     body.dark .chips button { background: #2d283e; color: #d1d5db; }
     body.dark .chips button.on { background: var(--v); color: #fff; }
     @media (min-width: 768px) { #grid { grid-template-columns: repeat(3, 1fr); } }
@@ -120,7 +148,7 @@
       body * { visibility: hidden; }
       #nota, #nota * { visibility: visible; }
       #nota { position: absolute; left: 0; top: 0; display: block !important; }
-      header, nav, .fab, button { display: none !important; }
+      header, #drawer, #drawer-back, .fab, .cart-fab, button { display: none !important; }
       main { overflow: visible; padding: 0; }
       @page { margin: 0; size: 58mm auto; }
     }
@@ -141,7 +169,8 @@
   <header>
     <div class="hdr-wrap">
       <div class="hdr-brand">
-        <div class="hdr-logo">R</div>
+        <button id="menubtn" onclick="openDrawer()" class="btn-theme" title="Menu" style="display:none">☰</button>
+        <div class="hdr-logo" id="hdr-logo">R</div>
         <div class="hdr-titles">
           <h1>RumaPos</h1>
           <span class="hdr-sub" id="hdr-toko">Toko 1 • Kasir POS</span>
@@ -260,12 +289,27 @@
       </div>
       <div class="card">
         <h3>📦 Daftar Stok</h3>
+        <input id="sq-q" placeholder="🔍 Cari nama / barcode produk..." oninput="searchStok()" autocomplete="off">
+        <small id="plist-info" class="tag" style="display:block;margin-bottom:6px"></small>
         <div class="row" style="margin-bottom:10px">
           <button class="b" onclick="exportCSV()">⬇ Ekspor CSV</button>
           <button class="s" onclick="importCSV()">⬆ Impor CSV</button>
         </div>
         <input type="file" id="fcsv" accept=".csv" style="display:none" onchange="doImportCSV(event)">
         <ul id="plist"></ul>
+        <div class="pager" id="pager">
+          <button class="s" id="pprev" onclick="stokPage(-1)">← Sebelumnya</button>
+          <span id="pinfo" class="tag" style="font-size:13px"></span>
+          <button class="s" id="pnext" onclick="stokPage(1)">Selanjutnya →</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🗂️ Kategori Produk</h3>
+        <div class="row">
+          <input id="newcat" placeholder="Nama kategori baru" autocomplete="off">
+          <button class="b" onclick="addCat()" style="max-width:130px">＋ Tambah</button>
+        </div>
+        <ul id="catlist"></ul>
       </div>
       <div class="card">
         <h3>📒 Riwayat Perubahan Stok</h3>
@@ -289,6 +333,15 @@
           <option value="58">58 mm (thermal umum)</option>
           <option value="80">80 mm</option>
         </select>
+        <label>Logo Toko (tampil di header &amp; nota)</label>
+        <div class="row" style="align-items:center;margin-bottom:10px">
+          <img id="logo-prev" style="width:64px;height:64px;object-fit:cover;border-radius:12px;display:none;border:2px solid #e5e7eb">
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <button class="b" onclick="$('slogo').click()">📷 Ganti Logo</button>
+            <button class="r" onclick="delLogo()">🗑 Hapus Logo</button>
+          </div>
+        </div>
+        <input type="file" id="slogo" accept="image/*" style="display:none" onchange="setLogo(this)">
         <div class="row">
           <button class="b" onclick="previewNota()">👁 Preview Nota</button>
           <button class="g" onclick="saveStore()">💾 Simpan</button>
@@ -365,13 +418,34 @@
     </div>
   </main>
 
-  <nav id="nav" style="display:none">
-    <button onclick="show('kasir')" id="tab-kasir" class="on">🧾 Kasir</button>
-    <button onclick="show('stok')" id="tab-stok" class="role-own">📦 Stok</button>
-    <button onclick="show('lap')" id="tab-lap" class="role-own">📊 Laporan</button>
-    <button onclick="show('data')" id="tab-data" class="role-own">💾 Data</button>
-    <button onclick="logout()">Keluar</button>
-  </nav>
+  <div id="drawer-back" onclick="closeDrawer()"></div>
+  <aside id="drawer">
+    <div class="dprof">
+      <div class="hdr-logo" id="drawer-logo">R</div>
+      <div style="min-width:0">
+        <b id="dprof-name">RumaPos</b>
+        <small id="dprof-role">Kasir POS</small>
+      </div>
+    </div>
+    <nav class="dnav">
+      <button onclick="show('kasir')" id="tab-kasir" class="on">🧾 Kasir</button>
+      <button onclick="show('stok')" id="tab-stok" class="role-own">📦 Stok</button>
+      <button onclick="show('lap')" id="tab-lap" class="role-own">📊 Laporan</button>
+      <button onclick="show('data')" id="tab-data" class="role-own">💾 Data</button>
+      <button class="exit" onclick="logout()">🚪 Keluar</button>
+    </nav>
+  </aside>
+
+  <div id="nota-modal" class="nota-modal">
+    <div class="nota-paper">
+      <div id="nota-body"></div>
+      <div class="nota-actions">
+        <button class="b" id="nota-bt" onclick="cetakBt()" style="display:none">🖨️ Cetak Bluetooth</button>
+        <button class="g" onclick="cetakSistem()">🖨️ Cetak / Simpan PDF</button>
+        <button class="s" onclick="closeNota()">Tutup</button>
+      </div>
+    </div>
+  </div>
 
   <div id="scan">
     <video id="cam" autoplay playsinline muted></video>

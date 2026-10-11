@@ -20,6 +20,7 @@ db.pinC ||= '0000';
 db.store ||= { name: 'Toko Saya', address: '', phone: '', footer: 'Terima kasih sudah berbelanja!', paper: '58' };
 db.discType ||= 'nominal';
 db.discVal ||= 0;
+db.categories ||= ['Makanan', 'Minuman', 'Sembako', 'Lainnya'];
 if(!db.tokoId) { db.tokoId = 'TOKO_' + Math.floor(Math.random()*9000+1000); save(); }
 
 // Produk contoh untuk demo
@@ -92,9 +93,14 @@ window.login = async () => {
         $('auth').style.display = 'none';
         $('auth').style.opacity = '1';
         $('app').style.display = 'block';
-        $('nav').style.display = 'flex';
+        if($('menubtn')) $('menubtn').style.display = 'flex';
         if($('fab-scan')) $('fab-scan').style.display = 'block';
         if($('hdr-toko')) $('hdr-toko').textContent = `${db.tokoId || 'Toko Utama'} • Kasir POS`;
+        let nm = $('dprof-name'); if(nm) nm.textContent = db.store.name || 'RumaPos';
+        let dr = $('dprof-role'); if(dr) dr.textContent = role === 'owner' ? '👑 Pemilik' : '🧑‍💼 Kasir';
+        applyLogo();
+        renderCatSelect();
+        renderCats();
         let rb = $('role-badge');
         if(rb) {
             rb.style.display = 'inline-block';
@@ -149,9 +155,10 @@ window.logout = async () => {
     stopIdle();
     role = ''; activePin = ''; sessionId = '';
     if($('role-badge')) $('role-badge').style.display = 'none';
+    closeDrawer();
+    if($('menubtn')) $('menubtn').style.display = 'none';
     $('auth').style.display = 'block';
     $('app').style.display = 'none';
-    $('nav').style.display = 'none';
     if($('fab-scan')) $('fab-scan').style.display = 'none';
 };
 
@@ -184,8 +191,12 @@ window.rp = rp; window.clean = clean;
 
 window.show = t => {
     ['kasir','stok','lap','data'].forEach(x => { $('tab-'+x).classList.toggle('on', x===t); $(x).classList.toggle('on', x===t); });
+    closeDrawer();
     if(t==='stok') { renderP(); renderLog(); } if(t==='lap') renderS(); if(t==='data') { renderBackups(); renderTrash(); }
 };
+
+window.openDrawer = () => { $('drawer').classList.add('on'); $('drawer-back').classList.add('on'); };
+window.closeDrawer = () => { $('drawer').classList.remove('on'); $('drawer-back').classList.remove('on'); };
 
 let editIdx = null;
 
@@ -282,11 +293,21 @@ window.adjustStock = i => {
     save(); renderP();
 };
 
+let stokQ = '', stokPageN = 0;
+const STOK_PER = 10;
+
+window.searchStok = () => { stokQ = $('sq-q').value; stokPageN = 0; renderP(); };
+window.stokPage = d => { stokPageN = Math.max(0, stokPageN + d); renderP(); };
+
 window.renderP = () => {
-    let q = (searchQ || '').toLowerCase();
-    let list = db.products.map((p, i) => ({ p, i })).filter(x => !q || x.p.n.toLowerCase().includes(q));
+    let q = (stokQ || '').toLowerCase();
+    let all = db.products.map((p, i) => ({ p, i }))
+        .filter(x => !q || x.p.n.toLowerCase().includes(q) || (x.p.c || '').includes(q));
+    let pages = Math.max(1, Math.ceil(all.length / STOK_PER));
+    if(stokPageN >= pages) stokPageN = pages - 1;
+    let list = all.slice(stokPageN * STOK_PER, (stokPageN + 1) * STOK_PER);
     $('plist').innerHTML = list.map(({ p, i }) =>
-        `<li><span class="big">${p.n}<span class="tag">Rp${rp(p.p)} · Stok: ${p.q}${p.q <= db.lowStock ? ' ⚠️ MENIPIS' : ''}${p.c?' · '+p.c:''}</span></span>
+        `<li><span class="big">${p.n}<span class="tag">Rp${rp(p.p)} · Stok: ${p.q}${p.q <= db.lowStock ? ' ⚠️ MENIPIS' : ''}${p.c?' · '+p.c:''}${p.cat?' · '+p.cat:''}</span></span>
          <span style="display:flex;gap:6px">
            <button onclick="adjustStock(${i})" style="background:var(--g)">±</button>
            ${p.c ? `<button onclick="printBarcode(${i})" style="background:var(--s)">🖨️</button>` : ''}
@@ -294,6 +315,16 @@ window.renderP = () => {
            <button onclick="delProd(${i})" style="background:var(--r)">🗑</button>
          </span></li>`).join('')
          || '<div class="empty">Belum ada produk. Tambahkan di atas.</div>';
+    let info = $('plist-info');
+    if(info) info.textContent = `${all.length} produk` + (q ? ` cocok "${stokQ}"` : '');
+    let pg = $('pager');
+    if(pg) {
+        pg.style.display = pages > 1 ? 'flex' : 'none';
+        let pi = $('pinfo'); if(pi) pi.textContent = `Hal ${stokPageN + 1} / ${pages}`;
+        let pv = $('pprev'), nx = $('pnext');
+        if(pv) pv.disabled = stokPageN === 0;
+        if(nx) nx.disabled = stokPageN >= pages - 1;
+    }
 };
 
 window.addProd = () => {
@@ -348,18 +379,62 @@ window.printBarcode = i => {
     $('printbar').style.display = 'none';
 };
 
-const CATS = ['Semua', 'Makanan', 'Minuman', 'Sembako', 'Lainnya'];
+const CATS = () => ['Semua', ...db.categories];
 let catFilter = 'Semua', imgBuf = '';
 
 window.pickCat = c => { catFilter = c; renderGrid(); };
 
+window.addCatFast = () => {
+    let n = clean(prompt('Nama kategori baru:'), 24);
+    if(!n) return;
+    if(db.categories.some(c => c.toLowerCase() === n.toLowerCase())) return alert('Kategori sudah ada');
+    db.categories.push(n); save();
+    renderCats(); renderGrid(); renderCatSelect();
+};
+
+window.addCat = () => {
+    let n = clean($('newcat').value, 24);
+    if(!n) return alert('Nama kategori kosong');
+    if(db.categories.some(c => c.toLowerCase() === n.toLowerCase())) return alert('Kategori sudah ada');
+    db.categories.push(n); save();
+    $('newcat').value = '';
+    renderCats(); renderGrid(); renderCatSelect();
+    alert('Kategori "' + n + '" ditambahkan.');
+};
+
+window.delCat = i => {
+    let n = db.categories[i];
+    if(db.categories.length <= 1) return alert('Minimal harus ada 1 kategori.');
+    if(!confirm(`Hapus kategori "${n}"? Produk di kategori ini dipindah ke kategori pertama yang tersisa.`)) return;
+    let fallback = db.categories.find((_, j) => j !== i);
+    db.products.forEach(p => { if(p.cat === n) p.cat = fallback; });
+    db.categories.splice(i, 1);
+    if(catFilter === n) catFilter = 'Semua';
+    save(); renderCats(); renderGrid(); renderCatSelect(); renderP();
+    alert('Kategori dihapus.');
+};
+
+window.renderCats = () => {
+    let el = $('catlist');
+    if(!el) return;
+    el.innerHTML = db.categories.map((c, i) =>
+        `<li><span class="big">${c}<span class="tag">${db.products.filter(p => p.cat === c).length} produk</span></span>
+         <button onclick="delCat(${i})" style="background:var(--r)">🗑</button></li>`).join('');
+};
+
+window.renderCatSelect = () => {
+    let sel = $('pcat');
+    if(!sel) return;
+    let cur = sel.value;
+    sel.innerHTML = db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    if(db.categories.includes(cur)) sel.value = cur;
+};
+
 window.renderGrid = () => {
     let chips = $('chips');
-    if(chips && !chips.dataset.done) {
-        chips.innerHTML = CATS.map(c => `<button class="${c===catFilter?'on':''}" onclick="pickCat('${c}')">${c}</button>`).join('');
-        chips.dataset.done = '1';
-    } else if(chips) {
-        [...chips.children].forEach(b => b.classList.toggle('on', b.textContent === catFilter));
+    if(chips) {
+        chips.innerHTML = CATS().map(c => `<button class="${c===catFilter?'on':''}" onclick="pickCat('${c}')">${c}</button>`).join('') +
+            `<button class="add" onclick="addCatFast()" title="Tambah kategori baru">＋</button>`;
     }
     let q = (searchQ || '').toLowerCase();
     let list = db.products.filter(p =>
@@ -489,13 +564,14 @@ window.pay = () => {
 };
 
 // --- Nota thermal ---
-const printNota = sale => {
+const buildNotaHtml = sale => {
     let s = db.store, w = s.paper === '80' ? 300 : 220;
     let rows = sale.items.map(i =>
         `<div class="n-row">${clean(i.n)}</div>
          <div class="n-sub"><span>${i.qty} x ${rp(i.p)}</span><span>${rp(i.p * i.qty)}</span></div>`).join('');
-    let html = `
-      <div class="nota" style="width:${w}px">
+    return `
+      <div class="nota" style="width:${w}px;margin:0 auto;padding:14px 10px">
+        ${db.store.logo ? `<div style="text-align:center;margin-bottom:6px"><img src="${db.store.logo}" style="width:64px;height:64px;object-fit:cover;border-radius:8px"></div>` : ''}
         <div class="n-head">${clean(s.name, 40) || 'Toko'}</div>
         ${s.address ? `<div class="n-line">${clean(s.address, 120)}</div>` : ''}
         ${s.phone ? `<div class="n-line">${clean(s.phone, 30)}</div>` : ''}
@@ -515,9 +591,25 @@ const printNota = sale => {
         <div class="n-dash">----------------------------</div>
         <div class="n-thanks">${clean(s.footer, 80) || 'Terima kasih'}</div>
       </div>`;
+};
+
+const openNota = sale => {
+    window._lastNota = sale;
+    $('nota-body').innerHTML = buildNotaHtml(sale);
+    let bt = $('nota-bt');
+    if(bt) bt.style.display = (window.Capacitor && window.Capacitor.isPluginAvailable('BleClient')) ? 'block' : 'none';
+    $('nota-modal').classList.add('on');
+};
+
+window.closeNota = () => $('nota-modal').classList.remove('on');
+
+window.cetakSistem = () => {
+    let sale = window._lastNota;
+    if(!sale) return;
     let box = $('nota');
-    box.innerHTML = html;
+    box.innerHTML = buildNotaHtml(sale);
     box.style.display = 'block';
+    $('nota-modal').classList.remove('on');
     let prevApp = $('app').style.display;
     $('app').style.display = 'none';
     $('auth').style.display = 'none';
@@ -526,6 +618,15 @@ const printNota = sale => {
     box.innerHTML = '';
     $('app').style.display = prevApp;
 };
+
+window.cetakBt = () => {
+    let sale = window._lastNota;
+    if(!sale) return;
+    if(window.printBtNota) printBtNota(sale).catch(e => alert('Cetak Bluetooth gagal: ' + (e.message || e)));
+    else alert('Printer Bluetooth tidak tersedia di perangkat ini.');
+};
+
+const printNota = sale => openNota(sale);
 
 window.reprintNota = id => {
     let s = db.sales.find(x => x.id === id);
@@ -541,10 +642,39 @@ window.saveStore = () => {
         address: clean($('st-addr').value, 120),
         phone: clean($('st-phone').value, 30).replace(/[^\d+\-\s]/g, ''),
         footer: clean($('st-foot').value, 80),
-        paper: $('st-paper').value
+        paper: $('st-paper').value,
+        logo: db.store.logo || null
     };
     save();
+    let nm = $('dprof-name'); if(nm) nm.textContent = name;
     alert('Profil toko disimpan.');
+};
+
+window.setLogo = async inp => {
+    let f = inp.files[0];
+    if(!f) return;
+    let logo = await compress(f);
+    if(!logo) return alert('Gagal memproses gambar');
+    db.store.logo = logo;
+    save(); applyLogo();
+    inp.value = '';
+    alert('Logo toko diperbarui.');
+};
+
+window.delLogo = () => {
+    if(!db.store.logo) return alert('Belum ada logo.');
+    if(!confirm('Hapus logo toko?')) return;
+    delete db.store.logo;
+    save(); applyLogo();
+    alert('Logo dihapus.');
+};
+
+const applyLogo = () => {
+    let logo = db.store.logo;
+    let h = $('hdr-logo'), d = $('drawer-logo'), p = $('logo-prev');
+    if(h) h.innerHTML = logo ? `<img src="${logo}" alt="logo">` : 'R';
+    if(d) d.innerHTML = logo ? `<img src="${logo}" alt="logo">` : 'R';
+    if(p) { if(logo) { p.src = logo; p.style.display = 'block'; } else p.style.display = 'none'; }
 };
 
 window.previewNota = () => {
@@ -779,6 +909,7 @@ const matchCode = code => {
 };
 
 render();
+applyLogo();
 syncBadge();
 renderGrid();
 
