@@ -46,6 +46,10 @@
     label { font-size: 13px; color: var(--mut); font-weight: 600; display: block; margin-bottom: 4px; }
     input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--b); outline-offset: 2px; }
 
+    /* --- Layout POS 2 panel --- */
+    .pos-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .pos-right { flex-direction: column; gap: 12px; }
+
     @media (max-width: 767px) {
       .cart-fab { display: block; position: sticky; bottom: 78px; z-index: 6; box-shadow: 0 6px 18px rgba(16,185,129,.5); }
       .pos-right { display: none; position: fixed; inset: 0; z-index: 20; overflow-y: auto; background: var(--bg); padding: 16px; padding-bottom: 100px; }
@@ -53,20 +57,13 @@
       .back-btn { display: block; }
     }
     @media (min-width: 768px) {
-      .cart-fab { display: none; }
-      .back-btn { display: none; }
-    }
-
-    /* --- Layout POS 2 panel --- */
-    .pos-wrap { display: flex; flex-direction: column; gap: 12px; }
-    .pos-right { display: flex; flex-direction: column; gap: 12px; }
-
-    @media (min-width: 768px) {
       body { max-width: 1100px; margin: 0 auto; }
       main { padding-bottom: 96px; }
+      .cart-fab { display: none; }
+      .back-btn { display: none; }
       .pos-wrap { flex-direction: row; align-items: flex-start; }
       .pos-left { flex: 1.5; min-width: 0; }
-      .pos-right { flex: 1; position: sticky; top: 16px; max-height: calc(100vh - 130px); overflow-y: auto; }
+      .pos-right { display: flex; flex: 1; position: sticky; top: 16px; max-height: calc(100vh - 130px); overflow-y: auto; }
       #grid { grid-template-columns: repeat(3, 1fr); }
     }
     #scan { position: fixed; inset: 0; background: #000; z-index: 9; display: none; flex-direction: column; }

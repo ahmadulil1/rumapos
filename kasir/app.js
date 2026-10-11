@@ -121,6 +121,7 @@ window.login = async () => {
         pinTries = 0;
         startIdle();
         show('kasir');
+        closeCheckout();
     } catch(e) {
         $('auth').style.opacity = '1';
         pinTries++;
