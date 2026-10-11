@@ -829,7 +829,10 @@ window.chgPay = () => {
     $('chg').textContent = rp(kembali);
 };
 
-window.openCheckout = () => $('posright').classList.add('open');
+window.openCheckout = () => {
+    $('posright').classList.add('open');
+    chgPay();
+};
 window.closeCheckout = () => $('posright').classList.remove('open');
 
 window.render = () => {
@@ -1023,6 +1026,7 @@ const matchCode = code => {
 };
 
 render();
+chgPay();
 applyLogo();
 syncBadge();
 renderGrid();
