@@ -93,8 +93,14 @@ window.login = async () => {
         $('auth').style.opacity = '1';
         $('app').style.display = 'block';
         $('nav').style.display = 'flex';
-        $('fab-scan').style.display = 'block';
-        $('hdr-toko').textContent = `(${db.tokoId})`;
+        if($('fab-scan')) $('fab-scan').style.display = 'block';
+        if($('hdr-toko')) $('hdr-toko').textContent = `${db.tokoId || 'Toko Utama'} • Kasir POS`;
+        let rb = $('role-badge');
+        if(rb) {
+            rb.style.display = 'inline-block';
+            rb.textContent = role === 'owner' ? '👑 Pemilik' : '🧑‍💼 Kasir';
+            rb.style.background = role === 'owner' ? 'rgba(16,185,129,.35)' : 'rgba(245,158,11,.35)';
+        }
         activePin = p;
         
         // --- Rekam Jam Masuk Kasir ke Cloud ---
@@ -142,10 +148,11 @@ window.logout = async () => {
     }
     stopIdle();
     role = ''; activePin = ''; sessionId = '';
+    if($('role-badge')) $('role-badge').style.display = 'none';
     $('auth').style.display = 'block';
     $('app').style.display = 'none';
     $('nav').style.display = 'none';
-    $('fab-scan').style.display = 'none';
+    if($('fab-scan')) $('fab-scan').style.display = 'none';
 };
 
 // --- Logout otomatis saat idle ---
@@ -551,9 +558,9 @@ window.previewNota = () => {
 const syncBadge = () => {
     let b = $('sync-badge');
     if(!b) return;
-    if(!navigator.onLine) { b.textContent = '📡 Offline'; b.style.background = 'rgba(239,68,68,.5)'; }
-    else if(db.pendingSales.length) { b.textContent = `⏳ ${db.pendingSales.length} menunggu`; b.style.background = 'rgba(245,158,11,.5)'; }
-    else { b.textContent = '✅ Tersinkron'; b.style.background = 'rgba(16,185,129,.5)'; }
+    if(!navigator.onLine) { b.textContent = '● Offline'; b.style.background = 'rgba(239,68,68,.35)'; }
+    else if(db.pendingSales.length) { b.textContent = `⏳ ${db.pendingSales.length} antre`; b.style.background = 'rgba(245,158,11,.35)'; }
+    else { b.textContent = '● Online'; b.style.background = 'rgba(16,185,129,.35)'; }
 };
 
 const syncPending = async () => {
