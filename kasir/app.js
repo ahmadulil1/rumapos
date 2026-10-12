@@ -128,6 +128,8 @@ window.login = async () => {
             rb.style.background = role === 'owner' ? 'rgba(16,185,129,.35)' : 'rgba(245,158,11,.35)';
         }
         activePin = p;
+        localStorage.setItem('rp_last_pin', p);
+        localStorage.setItem('rp_last_ts', String(Date.now()));
         
         // --- Rekam Jam Masuk Kasir ke Cloud ---
         if(window.fdb && navigator.onLine) {
@@ -174,6 +176,8 @@ window.logout = async () => {
     }
     stopIdle();
     role = ''; activePin = ''; sessionId = '';
+    localStorage.removeItem('rp_last_pin');
+    localStorage.removeItem('rp_last_ts');
     if($('role-badge')) $('role-badge').style.display = 'none';
     closeDrawer();
     if($('menubtn')) $('menubtn').style.display = 'none';
@@ -185,9 +189,10 @@ window.logout = async () => {
 // --- Logout otomatis saat idle ---
 const resetIdle = () => {
     if(!role) return;
+    localStorage.setItem('rp_last_ts', String(Date.now()));
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-        alert('Sesi berakhir karena tidak ada aktivitas. Silakan login kembali.');
+        alert('Sesi dikunci karena tidak ada aktivitas. Silakan masukkan PIN kembali.');
         logout();
     }, IDLE_MS);
 };
@@ -936,6 +941,17 @@ chgPay();
 applyLogo();
 syncBadge();
 renderGrid();
+
+// Auto-login jika sesi PIN belum kedaluwarsa (login sekali, minta PIN jika idle > IDLE_MS)
+const checkSavedSession = () => {
+    let savedPin = readLS('rp_last_pin');
+    let lastTs = Number(readLS('rp_last_ts')) || 0;
+    if(savedPin && (Date.now() - lastTs < IDLE_MS)) {
+        if($('pin')) $('pin').value = savedPin;
+        login();
+    }
+};
+checkSavedSession();
 
 // ponytail: expose untuk testing (test.js), bukan untuk UI
 window.grandTotal = grandTotal; window.nextNo = nextNo; window.db = db;
